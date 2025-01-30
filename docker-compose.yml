@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  identity-service:
+    build: .
+    container_name: identity-service
+    restart: always
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/identityDB
+      - REDIS_URI=redis://redis:6379
+      - JWT_SECRET=your_jwt_secret
+      - REFRESH_SECRET=your_refresh_secret
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mongo_data:
+  redis_data:
+
