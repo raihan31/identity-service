@@ -2,6 +2,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const redisClient = require('../config/redis');
+const passport = require('passport');
+
+
 
 
 const signup = async (req, res) => {
@@ -66,5 +69,24 @@ const logout = async (req, res) => {
     }
 }
 
+const googleAuth = passport.authenticate('google',{ scope: ['profile', 'email'] });
 
-module.exports = {signup, login, logout, refreshToken}
+const googleAuthCallback = passport.authenticate('google', {
+    successRedirect: '/api/auth/success',
+    failureRedirect: '/api/auth/failure',
+})
+
+const authSuccess = (req, res) => {
+    if( !req.user ) {
+        return res.status(401).json({message: 'Unauthorized'});
+    }
+    res.status(200).json({message: 'Google successfully logged in', user: req.user});
+}
+
+const authFailure = (req, res) => {
+    res.status(401).json({message: 'Google auth failed with error'});
+}
+
+
+
+module.exports = {signup, login, logout, refreshToken, googleAuth, googleAuthCallback, authSuccess, authFailure};
